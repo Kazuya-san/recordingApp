@@ -65,6 +65,7 @@ start2.addEventListener("click", async function () {
 });
 
 stop.addEventListener("click", function () {
+  recordedtimeSecs = 0;
   mediaRecorder.stream.getTracks().forEach((track) => track.stop());
   mediaRecorder.stop();
   recordend.textContent = "Stopped recording";
