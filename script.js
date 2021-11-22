@@ -6,7 +6,8 @@ let start = document.getElementById("start"),
   circrec = document.getElementById("circrec"),
   precordedTime = document.getElementById("timerecorded"),
   recordedtimeSecs = 0,
-  mediaRecorder;
+  mediaRecorder,
+  mediaRecorder2;
 
 function hasGetUserMedia() {
   return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -44,24 +45,26 @@ start.addEventListener("click", async function () {
 start2.addEventListener("click", async function () {
   let stream = await recordwebCam();
   let mimeType = "video/mp4";
-  mediaRecorder = createRecorder(stream, mimeType);
-  recordstart.textContent = "Started recording";
-  recordend.textContent = "";
-  circrec.style.backgroundColor = "red";
-  handle = setInterval(() => {
-    recordedtimeSecs += 500 / 1000;
-    //convert seconds to hours minutes and seconds
-    let hours = Math.floor(recordedtimeSecs / 3600),
-      minutes = Math.floor(recordedtimeSecs / 60),
-      seconds = Math.floor(recordedtimeSecs % 60);
+  setTimeout(() => {
+    mediaRecorder = createRecorder(stream, mimeType);
+    recordstart.textContent = "Started recording";
+    recordend.textContent = "";
+    circrec.style.backgroundColor = "red";
+    handle = setInterval(() => {
+      recordedtimeSecs += 500 / 1000;
+      //convert seconds to hours minutes and seconds
+      let hours = Math.floor(recordedtimeSecs / 3600),
+        minutes = Math.floor(recordedtimeSecs / 60),
+        seconds = Math.floor(recordedtimeSecs % 60);
 
-    precordedTime.innerText = `${hours}:${minutes}:${seconds}`;
-    if (circrec.style.backgroundColor === "rgb(16, 13, 49)") {
-      circrec.style.backgroundColor = "red";
-    } else {
-      circrec.style.backgroundColor = "#100d31";
-    }
-  }, 500);
+      precordedTime.innerText = `${hours}:${minutes}:${seconds}`;
+      if (circrec.style.backgroundColor === "rgb(16, 13, 49)") {
+        circrec.style.backgroundColor = "red";
+      } else {
+        circrec.style.backgroundColor = "#100d31";
+      }
+    }, 500);
+  }, 2000);
 });
 
 stop.addEventListener("click", function () {
@@ -85,6 +88,7 @@ async function recordScreen() {
       },
       audio: true,
     };
+
     return await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
   } else {
     console.log("Screen Record get display media is not supported");
@@ -130,12 +134,12 @@ function createRecorder(stream, mimeType) {
 
 function saveFile(recordedChunks) {
   const blob = new Blob(recordedChunks, {
-    type: "video/webm",
+    type: "video/mp4",
   });
   let filename = window.prompt("Enter file name"),
     downloadLink = document.createElement("a");
   downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = `${filename}.webm`;
+  downloadLink.download = `${filename}.mp4`;
 
   document.getElementById("body").appendChild(downloadLink);
   downloadLink.click();

@@ -1,16 +1,16 @@
 body {
-  display: "flex";
+  /* display: "flex";
   flex-direction: "column";
   justify-content: "center";
   align-items: "center";
-  padding: "0 2rem";
+  padding: "0 2rem"; */
   background-color: #100d31;
   color: #fff !important;
 }
 
 .center {
   display: flex;
-  height: 50vh;
+  height: 85vh;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -26,7 +26,6 @@ div {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  height: 300px;
 }
 
 .btngroup {
