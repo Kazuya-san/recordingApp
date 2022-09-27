@@ -82,8 +82,8 @@ async function recordScreen() {
   if (hasGetDisplayMedia()) {
     let displayMediaOptions = {
       video: {
-        width: { ideal: 4096 },
-        height: { ideal: 2160 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
         cursor: "always",
       },
       audio: true,
@@ -100,8 +100,8 @@ async function recordwebCam() {
   if (hasGetUserMedia()) {
     let displayMediaOptions = {
       video: {
-        width: { ideal: 4096 },
-        height: { ideal: 2160 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
         cursor: "always",
       },
       audio: true,
@@ -124,7 +124,10 @@ function createRecorder(stream, mimeType) {
     }
   };
   mediaRecorder.onstop = function () {
-    saveFile(recordedChunks);
+    //saveFile(recordedChunks);
+    getSeekableBlob(new Blob(recordedChunks), function (seekableBlob) {
+      saveFile(seekableBlob);
+    });
     recordedChunks = [];
   };
 
@@ -132,17 +135,45 @@ function createRecorder(stream, mimeType) {
   return mediaRecorder;
 }
 
-function saveFile(recordedChunks) {
-  const blob = new Blob(recordedChunks, {
-    type: "video/mp4",
-  });
+function saveFile(blob) {
   let filename = window.prompt("Enter file name"),
     downloadLink = document.createElement("a");
   downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = `${filename}.mp4`;
+  downloadLink.download = `${
+    filename.length > 0 ? filename : "recordingAppkazuya"
+  }.mp4`;
 
   document.getElementById("body").appendChild(downloadLink);
   downloadLink.click();
   URL.revokeObjectURL(blob); // clear from memory
   document.getElementById("body").removeChild(downloadLink);
+}
+
+function getSeekableBlob(inputBlob, callback) {
+  // EBML.js copyrights goes to: https://github.com/legokichi/ts-ebml
+  if (typeof EBML === "undefined") {
+    throw new Error("Please link: https://cdn.webrtc-experiment.com/EBML.js");
+  }
+  var reader = new EBML.Reader();
+  var decoder = new EBML.Decoder();
+  var tools = EBML.tools;
+  var fileReader = new FileReader();
+  fileReader.onload = function (e) {
+    var ebmlElms = decoder.decode(this.result);
+    ebmlElms.forEach(function (element) {
+      reader.read(element);
+    });
+    reader.stop();
+    var refinedMetadataBuf = tools.makeMetadataSeekable(
+      reader.metadatas,
+      reader.duration,
+      reader.cues
+    );
+    var body = this.result.slice(reader.metadataSize);
+    var newBlob = new Blob([refinedMetadataBuf, body], {
+      type: "video/mp4",
+    });
+    callback(newBlob);
+  };
+  fileReader.readAsArrayBuffer(inputBlob);
 }
